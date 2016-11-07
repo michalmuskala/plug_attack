@@ -46,7 +46,7 @@ defmodule PlugAttack do
     var      = Macro.escape(var)
     contents = Macro.escape(body)
 
-    quote bind_quoted: binding() do
+    quote bind_quoted: [message: message, var: var, contents: contents] do
       name = PlugAttack.register(__MODULE__, message)
       defp unquote(name)(unquote(var)), do: unquote(contents)
     end
