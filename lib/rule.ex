@@ -22,9 +22,10 @@ defmodule PlugAttack.Rule do
     now     = System.system_time(:milliseconds)
 
     count   = do_throttle(storage, key, now, period)
-    data    = [period: period, expires_at: expires_at(now, period), limit: limit]
     rem     = limit - count
-    {if(rem >= 0, do: :allow, else: :block), [remaining: max(0, rem)] ++ data}
+    data    = [period: period, expires_at: expires_at(now, period),
+               limit: limit, remaining: max(rem, 0)]
+    {if(rem >= 0, do: :allow, else: :block), {:throttle, data}}
   end
 
   defp expires_at(now, period) do

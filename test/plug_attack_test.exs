@@ -13,6 +13,16 @@ defmodule PlugAttackTest do
 
     rule "throttle", conn,
       do: PlugAttack.Rule.throttle(conn.remote_ip, storage: :ets, limit: 5, period: 100)
+
+    def block_action(conn, data, opts) do
+      send(self(), {:block, data})
+      super(conn, data, opts)
+    end
+
+    def allow_action(conn, data, opts) do
+      send(self(), {:allow, data})
+      super(conn, data, opts)
+    end
   end
 
   setup do
@@ -46,15 +56,38 @@ defmodule PlugAttackTest do
     refute conn.halted
   end
 
-  test "throttle works", %{conn: conn} do
-    refute TestPlug.call(conn, TestPlug.init([])).halted
-    refute TestPlug.call(conn, TestPlug.init([])).halted
-    refute TestPlug.call(conn, TestPlug.init([])).halted
-    refute TestPlug.call(conn, TestPlug.init([])).halted
+  test "throttle", %{conn: conn} do
     refute TestPlug.call(conn, TestPlug.init([])).halted
 
+    expires = (div(System.system_time(:milliseconds), 100) + 1) * 100
+    assert_receive {:allow, {:throttle, data}}
+    assert data[:period]     == 100
+    assert data[:limit]      == 5
+    assert data[:remaining]  == 4
+    assert data[:expires_at] == expires
+
+    refute TestPlug.call(conn, TestPlug.init([])).halted
+    refute TestPlug.call(conn, TestPlug.init([])).halted
+    refute TestPlug.call(conn, TestPlug.init([])).halted
+    refute TestPlug.call(conn, TestPlug.init([])).halted
+    flush()
+
     assert TestPlug.call(conn, TestPlug.init([])).halted
+    assert_receive {:block, {:throttle, data}}
+    assert data[:period]     == 100
+    assert data[:limit]      == 5
+    assert data[:remaining]  == 0
+    assert data[:expires_at] == expires
+
     :timer.sleep(100)
     refute TestPlug.call(conn, TestPlug.init([])).halted
+  end
+
+  defp flush() do
+    receive do
+      _ -> flush
+    after
+      0 -> :ok
+    end
   end
 end
