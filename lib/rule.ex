@@ -87,7 +87,7 @@ defmodule PlugAttack.Rule do
   defp expires_at(now, period), do: (div(now, period) + 1) * period
 
   defp do_throttle({mod, opts}, key, now, period, expires_at) do
-    full_key = {key, div(now, period)}
+    full_key = {:throttle, key, div(now, period)}
     mod.increment(opts, full_key, 1, expires_at)
   end
 end

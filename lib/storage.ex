@@ -3,7 +3,7 @@ defmodule PlugAttack.Storage do
   Behaviour for the storage backend for various rules.
   """
 
-  @type key :: {term, integer}
+  @type key :: {atom, term, integer}
   @type expires_at :: non_neg_integer
   @type opts :: term
 
