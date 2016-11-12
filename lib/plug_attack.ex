@@ -73,12 +73,11 @@ defmodule PlugAttack do
 
   @doc false
   defmacro __before_compile__(%{module: module} = env) do
-    opts         = Module.get_attribute(module, :plug_attack_opts)
-    plug_attack  = Module.get_attribute(module, :plug_attack)
+    plug_attack = Module.get_attribute(module, :plug_attack)
 
-    {conn, body} = PlugAttack.compile(env, plug_attack, opts)
+    {conn, opts, body} = PlugAttack.compile(env, plug_attack)
     quote do
-      defp plug_attack_call(unquote(conn), _), do: unquote(body)
+      defp plug_attack_call(unquote(conn), unquote(opts)), do: unquote(body)
     end
   end
 
@@ -161,18 +160,22 @@ defmodule PlugAttack do
   end
 
   @doc false
-  def compile(env, rules, opts) do
+  def compile(env, rules) do
     conn = quote(do: conn)
-    body = Enum.reduce(rules, conn, &quote_rule(&2, &1, conn, env, opts))
-    {conn, body}
+    opts = quote(do: opts)
+    body = Enum.reduce(rules, conn, &quote_rule(&2, &1, conn, opts, env))
+    {conn, opts, body}
   end
 
-  defp quote_rule(next, name, conn, _env, plug_opts) do
+  defp quote_rule(next, name, conn, opts, _env) do
     quote do
       case unquote(name)(unquote(conn)) do
-        {:allow, data} -> allow_action(unquote(conn), data, unquote(plug_opts))
-        {:block, data} -> block_action(unquote(conn), data, unquote(plug_opts))
+        {:allow, data} -> allow_action(unquote(conn), data, unquote(opts))
+        {:block, data} -> block_action(unquote(conn), data, unquote(opts))
         nil            -> unquote(next)
+        other ->
+          raise "a PlugAttack rule should return `{:allow, data}`, " <>
+            "`{:block, data}`, or `nil`, got: #{inspect other}"
       end
     end
   end
