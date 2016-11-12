@@ -1,5 +1,5 @@
 defmodule PlugAttack do
-  @moduledoc """
+  @moduledoc ~S"""
   A plug building toolkit for blocking and throttling abusive requests.
 
   PlugAttack is a set of macros that can be used to build a plug to protect
@@ -14,7 +14,7 @@ defmodule PlugAttack do
       defmodule MyApp.PlugAttack do
         use PlugAttack
 
-        # For more rules examples see `PlugAttack.rule/2` macro documentation.
+        # For more rules examples see PlugAttack.rule/2 macro documentation.
         rule "allow local", conn do
           allow conn.remote_ip == {127, 0, 0, 1}
         end
@@ -39,12 +39,12 @@ defmodule PlugAttack do
   @doc """
   Action performed when the request is blocked.
   """
-  @callback block_action(Plug.Conn.t, term, term) :: Plug.Conn.t
+  @callback block_action(conn :: Plug.Conn.t, term, term) :: Plug.Conn.t
 
   @doc """
   Action performed when the request is allowed.
   """
-  @callback allow_action(Plug.Conn.t, term, term) :: Plug.Conn.t
+  @callback allow_action(conn :: Plug.Conn.t, term, term) :: Plug.Conn.t
 
   defmacro __using__(opts) do
     quote do
@@ -89,7 +89,7 @@ defmodule PlugAttack do
     end
   end
 
-  @doc """
+  @doc ~S"""
   Defines a rule.
 
   A rule is an expression that returns either `{:allow, data}`, `{:block, data}`,
