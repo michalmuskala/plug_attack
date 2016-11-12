@@ -44,6 +44,12 @@ defmodule PlugAttack.Rule do
   Be careful not to use the same `key` for different rules that use the same
   storage.
 
+  Passes `{:throttle, data}`, as the data to both allow and block tuples, where
+  data is a keyword containing: `:period`, `:limit`, `:expires_at` - when the
+  current limit will expire as unix time in milliseconds,
+  and `:remaining` - the remaining limit. This can be useful for adding
+  "X-RateLimit-*" headers.
+
   ## Options
 
     * `:storage` - required, a tuple of `PlugAttack.Storage` implementation

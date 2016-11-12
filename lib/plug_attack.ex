@@ -27,7 +27,6 @@ defmodule PlugAttack do
           |> halt
         end
       end
-  end
   """
 
   @typedoc """
