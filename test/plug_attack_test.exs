@@ -12,7 +12,7 @@ defmodule PlugAttackTest do
     rule "block", do: if Process.get(:block), do: {:block, []}
 
     rule "throttle", conn do
-      PlugAttack.Rule.throttle(conn.remote_ip,
+      throttle(conn.remote_ip,
         storage: {PlugAttack.Storage.Ets, PlugAttackTest}, limit: 5, period: 100)
     end
 
@@ -28,7 +28,7 @@ defmodule PlugAttackTest do
   end
 
   setup do
-    {:ok, pid} = PlugAttack.Storage.Ets.start_link(name: __MODULE__)
+    {:ok, pid} = PlugAttack.Storage.Ets.start_link(__MODULE__)
     {:ok, conn: conn(:get, "/"), pid: pid}
   end
 
@@ -47,7 +47,7 @@ defmodule PlugAttackTest do
     Process.put(:rule, {:block, []})
     conn = TestPlug.call(conn, TestPlug.init([]))
     assert conn.halted
-    assert {403, _, "Forbidden!\n"} = sent_resp(conn)
+    assert {403, _, "Forbidden\n"} = sent_resp(conn)
   end
 
   test "runs the rules in the correct order", %{conn: conn} do
