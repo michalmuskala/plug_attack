@@ -6,7 +6,7 @@ defmodule PlugAttack do
   your web app from bad clients. It allows safelisting, blocklisting and
   throttling based on arbitrary properties of the request.
 
-  The throttling and fail2ban state is stored in a configurable storage.
+  The throttling state is stored in a configurable storage.
   By default an implementation backed by `:ets` tables is offered.
 
   ## Example
