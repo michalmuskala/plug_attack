@@ -19,8 +19,10 @@ defmodule PlugAttack do
           allow conn.remote_ip == {127, 0, 0, 1}
         end
 
+        # It's possible to customize what happens when conn is let through
         def allow_action(conn, _data, _opts), do: conn
 
+        # Or when it's blocked
         def block_action(conn, _data, _opts) do
           conn
           |> send_resp(:forbidden, "Forbidden\n")
@@ -34,7 +36,14 @@ defmodule PlugAttack do
   """
   @type rule :: {:allow, term} | {:block, term} | nil
 
+  @doc """
+  Action performed when the request is blocked.
+  """
   @callback block_action(Plug.Conn.t, term, term) :: Plug.Conn.t
+
+  @doc """
+  Action performed when the request is allowed.
+  """
   @callback allow_action(Plug.Conn.t, term, term) :: Plug.Conn.t
 
   defmacro __using__(opts) do
