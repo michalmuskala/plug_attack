@@ -16,7 +16,7 @@ defmodule PlugAttack.Storage.EtsTest do
 
   test "cleans periodically" do
     assert 1 = Ets.increment(__MODULE__, :foo, 1, 10)
-    :timer.sleep(100)
+    :timer.sleep(150)
     assert 1 = Ets.increment(__MODULE__, :foo, 1, 10)
   end
 end
