@@ -1,5 +1,5 @@
 defmodule PlugAttackTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   use Plug.Test
 
   doctest PlugAttack
@@ -11,8 +11,10 @@ defmodule PlugAttackTest do
     rule "allow", do: if Process.get(:allow), do: {:allow, []}
     rule "block", do: if Process.get(:block), do: {:block, []}
 
-    rule "throttle", conn,
-      do: PlugAttack.Rule.throttle(conn.remote_ip, storage: :ets, limit: 5, period: 100)
+    rule "throttle", conn do
+      PlugAttack.Rule.throttle(conn.remote_ip,
+        storage: {PlugAttack.Storage.Ets, PlugAttackTest}, limit: 5, period: 100)
+    end
 
     def block_action(conn, data, opts) do
       send(self(), {:block, data})
@@ -26,8 +28,8 @@ defmodule PlugAttackTest do
   end
 
   setup do
-    :ets.new(PlugAttack, [:named_table, :ordered_set, write_concurrency: true])
-    {:ok, conn: conn(:get, "/")}
+    {:ok, pid} = PlugAttack.Storage.Ets.start_link(name: __MODULE__)
+    {:ok, conn: conn(:get, "/"), pid: pid}
   end
 
   test "creates a plug" do
@@ -57,7 +59,7 @@ defmodule PlugAttackTest do
   end
 
   test "throttle", %{conn: conn} do
-    refute TestPlug.call(conn, TestPlug.init([])).halted
+    refute call(TestPlug, conn).halted
 
     expires = (div(System.system_time(:milliseconds), 100) + 1) * 100
     assert_receive {:allow, {:throttle, data}}
@@ -66,13 +68,13 @@ defmodule PlugAttackTest do
     assert data[:remaining]  == 4
     assert data[:expires_at] == expires
 
-    refute TestPlug.call(conn, TestPlug.init([])).halted
-    refute TestPlug.call(conn, TestPlug.init([])).halted
-    refute TestPlug.call(conn, TestPlug.init([])).halted
-    refute TestPlug.call(conn, TestPlug.init([])).halted
+    refute call(TestPlug, conn).halted
+    refute call(TestPlug, conn).halted
+    refute call(TestPlug, conn).halted
+    refute call(TestPlug, conn).halted
     flush()
 
-    assert TestPlug.call(conn, TestPlug.init([])).halted
+    assert call(TestPlug, conn).halted
     assert_receive {:block, {:throttle, data}}
     assert data[:period]     == 100
     assert data[:limit]      == 5
@@ -80,8 +82,15 @@ defmodule PlugAttackTest do
     assert data[:expires_at] == expires
 
     :timer.sleep(100)
-    refute TestPlug.call(conn, TestPlug.init([])).halted
+    refute call(TestPlug, conn).halted
+    assert_receive {:allow, {:throttle, data}}
+    assert data[:period]     == 100
+    assert data[:limit]      == 5
+    assert data[:remaining]  == 4
+    assert data[:expires_at] == expires + 100
   end
+
+  defp call(plug, conn, opts \\ []), do: plug.call(conn, plug.init(opts))
 
   defp flush() do
     receive do
