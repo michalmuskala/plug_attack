@@ -8,15 +8,37 @@ defmodule PlugAttack.Storage.EtsTest do
     {:ok, pid: pid}
   end
 
-  test "increments correctly" do
-    assert 1 == Ets.increment(__MODULE__, :foo, 1, 10)
-    assert 2 == Ets.increment(__MODULE__, :foo, 1, 10)
-    assert 4 == Ets.increment(__MODULE__, :foo, 2, 10)
+  test "increment/4" do
+    assert 1 == Ets.increment(__MODULE__, :foo, 1, expires_in(10))
+    assert 2 == Ets.increment(__MODULE__, :foo, 1, expires_in(10))
+    assert 4 == Ets.increment(__MODULE__, :foo, 2, expires_in(10))
+  end
+
+  test "sliding counter" do
+    assert 0 = Ets.read_sliding_counter(__MODULE__, :foo, now())
+    Ets.write_sliding_counter(__MODULE__, :foo, expires_in(20))
+    :timer.sleep(1)
+    Ets.write_sliding_counter(__MODULE__, :foo, expires_in(20))
+    assert 2 = Ets.read_sliding_counter(__MODULE__, :foo, now())
+    :timer.sleep(30)
+    assert 0 = Ets.read_sliding_counter(__MODULE__, :foo, now())
+  end
+
+  test "read/write" do
+    assert :error = Ets.read(__MODULE__, :foo, now())
+    Ets.write(__MODULE__, :foo, true, expires_in(20))
+    assert {:ok, true} == Ets.read(__MODULE__, :foo, now())
+    :timer.sleep(30)
+    assert :error = Ets.read(__MODULE__, :foo, now())
   end
 
   test "cleans periodically" do
-    assert 1 = Ets.increment(__MODULE__, :foo, 1, 10)
+    assert 1 = Ets.increment(__MODULE__, :foo, 1, expires_in(10))
     :timer.sleep(150)
-    assert 1 = Ets.increment(__MODULE__, :foo, 1, 10)
+    assert 1 = Ets.increment(__MODULE__, :foo, 1, expires_in(10))
   end
+
+  defp expires_in(ms), do: System.system_time(:milliseconds) + ms
+
+  defp now(), do: System.system_time(:milliseconds)
 end

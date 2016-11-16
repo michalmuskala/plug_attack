@@ -21,10 +21,48 @@ defmodule PlugAttack.Storage.Ets do
   @compile {:parse_transform, :ms_transform}
 
   @doc """
-  Implementation for the PlugAttack.Storage.increment/4 callback
+  Implementation for the PlugAttack.Storage.increment/4 callback.
   """
   def increment(name, key, inc, expires_at) do
     :ets.update_counter(name, key, inc, {key, 0, expires_at})
+  end
+
+  @doc """
+  Implementation for the PlugAttack.Storage.write_sliding_counter/3 callback.
+  """
+  def write_sliding_counter(name, key, expires_at) do
+    true = :ets.insert(name, {{key, expires_at}, 0, expires_at})
+    :ok
+  end
+
+  @doc """
+  Implementation for the PlugAttack.Storage.read_sliding_counter/3 callback.
+  """
+  def read_sliding_counter(name, key, now) do
+    ms = :ets.fun2ms(fn {{^key, _}, _, expires_at} ->
+      expires_at > now
+    end)
+    :ets.select_count(name, ms)
+  end
+
+  @doc """
+  Implementation for the PlugAttack.Storage.write/4 callback.
+  """
+  def write(name, key, value, expires_at) do
+    true = :ets.insert(name, {key, value, expires_at})
+    :ok
+  end
+
+  @doc """
+  Implementation for the PlugAttack.Storage.read/3 callback.
+  """
+  def read(name, key, now) do
+    case :ets.lookup(name, key) do
+      [{^key, value, expires_at}] when expires_at > now ->
+        {:ok, value}
+      _ ->
+        :error
+    end
   end
 
   @doc """
@@ -48,7 +86,8 @@ defmodule PlugAttack.Storage.Ets do
 
   @doc false
   def init({name, clean_period}) do
-    ^name = :ets.new(name, [:named_table, :set, :public, write_concurrency: true])
+    ^name = :ets.new(name, [:named_table, :set, :public,
+                            write_concurrency: true, read_concurrency: true])
     schedule(clean_period)
     {:ok, %{clean_period: clean_period, name: name}}
   end
