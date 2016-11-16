@@ -31,7 +31,7 @@ We first need to construct a plug that will list various rules we want to apply:
 ```elixir
 defmodule MyApp.PlugAttack do
   use PlugAttack
-  
+
   rule "allow local", conn do
     allow conn.remote_ip == {127, 0, 0, 1}
   end
@@ -63,7 +63,7 @@ ip address:
 
 ```elixir
 rule "throttle by ip", conn do
-  throttle conn.request_ip,
+  throttle conn.remote_ip,
     period: 60_000, limit: 10,
     storage: {PlugAttack.Storage.Ets, MyApp.PlugAttack.Storage}
 end
