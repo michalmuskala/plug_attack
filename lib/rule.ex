@@ -58,10 +58,7 @@ defmodule PlugAttack.Rule do
     * `:period` - required, how long, in ms, is the period.
 
   """
-  @spec throttle(term, [opt]) :: PlugAttack.rule when
-    opt: {:storage, {PlugAttack.Storage.t, PlugAttack.Storage.opts}} |
-         {:limit, pos_integer} |
-         {:period, pos_integer}
+  @spec throttle(term, Keyword.t) :: PlugAttack.rule
   def throttle(key, opts) do
     if key do
       do_throttle(key, opts)
@@ -117,6 +114,7 @@ defmodule PlugAttack.Rule do
     * `:ban_for` - required, length of the ban in milliseconds.
 
   """
+  @spec fail2ban(term, Keyword.t) :: PlugAttack.rule
   def fail2ban(key, opts) do
     if key do
       do_fail2ban(key, opts)
