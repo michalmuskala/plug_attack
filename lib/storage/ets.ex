@@ -66,6 +66,13 @@ defmodule PlugAttack.Storage.Ets do
   end
 
   @doc """
+  Forcefully clean the storage.
+  """
+  def clean(name) do
+    :ets.delete_all_objects(name)
+  end
+
+  @doc """
   Starts the storage table and cleaner process.
 
   The process is registered under `name` and a public, named ets table
