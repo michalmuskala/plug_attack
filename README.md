@@ -41,6 +41,10 @@ end
 The `MyApp.PlugAttack` module is now a regular plug that can be used, for
 example, in a phoenix endpoint.
 
+*WARNING*: if you're behind a proxy, like nginx or heroku's router, you need to
+make sure you have a plug that respects the `X-Forawrded-For` headers, for
+example: [remote_ip](https://hex.pm/packages/remote_ip).
+
 ## Throttling
 
 Before we implement throttling in our attack plug, we need to add a storage to
