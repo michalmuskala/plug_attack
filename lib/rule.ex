@@ -90,4 +90,64 @@ defmodule PlugAttack.Rule do
     full_key = {:throttle, key, div(now, period)}
     mod.increment(opts, full_key, 1, expires_at)
   end
+
+  @doc """
+  Implements an algorithm inspired by fail2ban.
+
+  This intends to catch misbehaving clients early and for longer amounts of
+  time. The `key` differentiates different clients, you can use, for example,
+  `conn.remote_ip` for per IP tracking. If the `key` is falsey the action is
+  skipped and next rules are evaluated.
+
+  Be careful not to use the same `key` for different rules that use the same
+  storage.
+
+  Passes `{:fail2ban, key}`, as the data to `block_action` calls when an
+  abusive request is detected. Each misbehaving client is blocked after each
+  call and tracked for `:period` time. If more than `:limit` abusive requests
+  are detected within the `:period`, the client is banned for `:ban_for`.
+
+  ## Options
+
+    * `:storage` - required, a tuple of `PlugAttack.Storage` implementation
+      and storage options.
+    * `:period` - required, how long to store abusive requests for counting
+      towards `:limit` exhaustion.
+    * `:limit` - required, max abusive requests allowed before the ban.
+    * `:ban_for` - required, length of the ban in milliseconds.
+
+  """
+  def fail2ban(key, opts) do
+    if key do
+      do_fail2ban(key, opts)
+    else
+      nil
+    end
+  end
+
+  defp do_fail2ban(key, opts) do
+    storage = Keyword.fetch!(opts, :storage)
+    limit   = Keyword.fetch!(opts, :limit)
+    period  = Keyword.fetch!(opts, :period)
+    ban_for = Keyword.fetch!(opts, :ban_for)
+    now     = System.system_time(:milliseconds)
+
+    if banned?(key, storage, now) do
+      {:block, {:fail2ban, :banned, key}}
+    else
+      track_fail2ban(key, storage, limit, period, ban_for, now)
+    end
+  end
+
+  defp banned?(key, {mod, opts}, now) do
+    mod.read(opts, {:fail2ban_banned, key}, now) == {:ok, true}
+  end
+
+  defp track_fail2ban(key, {mod, opts}, limit, period, ban_for, now) do
+    mod.write_sliding_counter(opts, {:fail2ban, key}, now, now + period)
+    if mod.read_sliding_counter(opts, {:fail2ban, key}, now) >= limit do
+      mod.write(opts, {:fail2ban_banned, key}, true, now + ban_for)
+    end
+    {:block, {:fail2ban, :counting, key}}
+  end
 end

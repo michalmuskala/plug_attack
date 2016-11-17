@@ -16,9 +16,8 @@ defmodule PlugAttack.Storage.EtsTest do
 
   test "sliding counter" do
     assert 0 = Ets.read_sliding_counter(__MODULE__, :foo, now())
-    Ets.write_sliding_counter(__MODULE__, :foo, expires_in(20))
-    :timer.sleep(1)
-    Ets.write_sliding_counter(__MODULE__, :foo, expires_in(20))
+    Ets.write_sliding_counter(__MODULE__, :foo, now(), expires_in(20))
+    Ets.write_sliding_counter(__MODULE__, :foo, now() + 1, expires_in(20))
     assert 2 = Ets.read_sliding_counter(__MODULE__, :foo, now())
     :timer.sleep(30)
     assert 0 = Ets.read_sliding_counter(__MODULE__, :foo, now())

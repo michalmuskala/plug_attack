@@ -30,8 +30,8 @@ defmodule PlugAttack.Storage.Ets do
   @doc """
   Implementation for the PlugAttack.Storage.write_sliding_counter/3 callback.
   """
-  def write_sliding_counter(name, key, expires_at) do
-    true = :ets.insert(name, {{key, expires_at}, 0, expires_at})
+  def write_sliding_counter(name, key, now, expires_at) do
+    true = :ets.insert(name, {{key, now}, 0, expires_at})
     :ok
   end
 

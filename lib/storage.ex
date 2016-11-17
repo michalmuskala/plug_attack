@@ -12,7 +12,7 @@ defmodule PlugAttack.Storage do
 
   @callback increment(opts, key, inc :: integer, expires_at :: time) :: integer
 
-  @callback write_sliding_counter(opts, key, expires_at :: time) :: :ok
+  @callback write_sliding_counter(opts, key, now :: time, expires_at :: time) :: :ok
 
   @callback read_sliding_counter(opts, key, now :: time) :: non_neg_integer
 
