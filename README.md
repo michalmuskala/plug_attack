@@ -54,7 +54,7 @@ supervision tree:
 ```elixir
 children = [
   # other children
-  worker(PlugAttack.Storage.Ets, [MyApp.PlugAttack.Storage, clean_period: 60_000])
+  worker(PlugAttack.Storage.Ets, [MyApp.PlugAttack.Storage, [clean_period: 60_000]])
 ]
 ```
 
