@@ -23,9 +23,8 @@ defmodule PlugAttack.Mixfile do
   end
 
   defp deps do
-    [{:plug,    "~> 1.0"},
-     {:earmark, "~> 1.0",  only: :dev},
-     {:ex_doc,  "~> 0.14", only: :dev}]
+    [{:plug, "~> 1.0"},
+     {:ex_doc, "~> 0.15", only: :dev}]
   end
 
   defp package do
