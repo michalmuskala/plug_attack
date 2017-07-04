@@ -96,7 +96,7 @@ def allow_action(conn, _data, _opts) do
   conn
 end
 
-def block_action(conn, {:throttle, data}, _opts) do
+def block_action(conn, {:throttle, data}, opts) do
   conn
   |> add_throttling_headers(data)
   |> block_action(false, opts)
