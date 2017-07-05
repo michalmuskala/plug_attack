@@ -86,6 +86,7 @@ data in the form of `{:throttle, data}`, where `data` is a keyword with various
 useful data we can use to construct rate limiting headers.
 
 ```elixir
+import Plug.Conn
 def allow_action(conn, {:throttle, data}, opts) do
   conn
   |> add_throttling_headers(data)
