@@ -16,7 +16,8 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     end
     ```
 
-  2. Ensure `plug_attack` is started before your application:
+  2. If using Elixir 1.3, ensure that `plug_attack` is started before your application  
+  (this step is no longer applicable to Elixir 1.4+):
 
     ```elixir
     def application do
