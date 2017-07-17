@@ -12,6 +12,7 @@ defmodule PlugAttack do
   ## Example
 
       defmodule MyApp.PlugAttack do
+        import Plug.Conn
         use PlugAttack
 
         # For more rules examples see PlugAttack.rule/2 macro documentation.
