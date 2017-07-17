@@ -10,20 +10,20 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
   1. Add `plug_attack` to your list of dependencies in `mix.exs`:
 
-    ```elixir
-    def deps do
-      [{:plug_attack, "~> 0.3.0"}]
-    end
-    ```
+```elixir
+def deps do
+  [{:plug_attack, "~> 0.3.0"}]
+end
+```
 
   2. If using Elixir 1.3, ensure that `plug_attack` is started before your application  
   (this step is no longer applicable to Elixir 1.4+):
 
-    ```elixir
-    def application do
-      [applications: [:plug_attack]]
-    end
-    ```
+```elixir
+def application do
+  [applications: [:plug_attack]]
+end
+```
 
 ## Basic usage
 
