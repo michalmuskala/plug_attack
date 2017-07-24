@@ -94,8 +94,8 @@ defmodule PlugAttack do
   Defines a rule.
 
   A rule is an expression that returns either `{:allow, data}`, `{:block, data}`,
-  or `nil`. If an allow or block tuple is returned we say the rule *matched*,
-  otherwise the rule didn't match and further rules will be evaluated.
+  `nil` or updated `conn`. If an allow or block tuple is returned we say the rule
+  *matched*, otherwise the rule didn't match and further rules will be evaluated.
 
   If a rule matched the corresponding `allow_action/3` or `block_action/3`
   function on the defining module will be called passing the `conn`,
@@ -170,21 +170,30 @@ defmodule PlugAttack do
 
   @doc false
   def compile(env, rules) do
-    conn = quote(do: conn)
     opts = quote(do: opts)
-    body = Enum.reduce(rules, conn, &quote_rule(&2, &1, conn, opts, env))
-    {conn, opts, body}
+    conn = quote(do: conn)
+    chain = Enum.reduce(rules, conn, &quote_rule(&2, &1, conn, opts, env))
+    {conn, opts, quote do
+      priv = {unquote(env.module), unquote(opts)}
+      conn = Plug.Conn.put_private(unquote(conn), :plug_attack, priv)
+      unquote(chain)
+    end}
   end
 
   defp quote_rule(next, name, conn, opts, _env) do
     quote do
       case unquote(name)(unquote(conn)) do
-        {:allow, data} -> allow_action(unquote(conn), data, unquote(opts))
-        {:block, data} -> block_action(unquote(conn), data, unquote(opts))
-        nil            -> unquote(next)
+        {:allow, data} ->
+          allow_action(unquote(conn), data, unquote(opts))
+        {:block, data} ->
+          block_action(unquote(conn), data, unquote(opts))
+        %Plug.Conn{} = unquote(conn) ->
+          unquote(next)
+        nil ->
+          unquote(next)
         other ->
           raise "a PlugAttack rule should return `{:allow, data}`, " <>
-            "`{:block, data}`, or `nil`, got: #{inspect other}"
+            "`{:block, data}`, `nil`, or `conn`, got: #{inspect other}"
       end
     end
   end

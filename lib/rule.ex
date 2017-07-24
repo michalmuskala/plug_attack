@@ -74,7 +74,7 @@ defmodule PlugAttack.Rule do
     now     = System.system_time(:milliseconds)
 
     expires_at = expires_at(now, period)
-    count      = do_throttle(storage, key, now, period, expires_at)
+    count      = increment_throttle(storage, key, now, period, expires_at)
     rem        = limit - count
     data       = [period: period, expires_at: expires_at,
                   limit: limit, remaining: max(rem, 0)]
@@ -83,9 +83,104 @@ defmodule PlugAttack.Rule do
 
   defp expires_at(now, period), do: (div(now, period) + 1) * period
 
-  defp do_throttle({mod, opts}, key, now, period, expires_at) do
+  defp increment_throttle({mod, opts}, key, now, period, expires_at) do
     full_key = {:throttle, key, div(now, period)}
     mod.increment(opts, full_key, 1, expires_at)
+  end
+
+  @doc """
+  Implements a conditional request throttling algorithm.
+
+  With a request that does not use conditional headers (`If-Modified-Since`
+  or `If-None-Match` behaves exactly like `throttle/2`). For conditional
+  requests defers counting the request towards the limit to after the response
+  is computed using `Plug.Conn.register_before_send/2`. The throttle counter
+  is not incremented in case of a `304 Not Modified` response.
+
+  The `key` differentiates different throttles, you can use, for example,
+  `conn.remote_ip` for per IP throttling, or an email address for login attempts
+  limitation. If the `key` is falsey the throttling is not performed and
+  next rules are evaluated.
+
+  Be careful not to use the same `key` for different rules that use the same
+  storage.
+
+  Passes `{:throttle, data}`, as the data to both allow and block tuples, where
+  data is a keyword containing: `:period`, `:limit`, `:expires_at` - when the
+  current limit will expire as unix time in milliseconds,
+  and `:remaining` - the remaining limit. This can be useful for adding
+  "X-RateLimit-*" headers. When lazy throttling is performed the `allow_action`
+  callback is called from within the callback registered with
+  `Plug.Conn.register_before_send/2`.
+
+  ## Race conditions
+
+  Because the counter is imcremented lazily, there's a possible race condition,
+  where more requests are let-through than intended. This can happen during
+  long requests, when the counter is not incremented (yet) when new requests
+  are coming in.
+
+  ## Options
+
+    * `:storage` - required, a tuple of `PlugAttack.Storage` implementation
+      and storage options.
+    * `:limit` - required, how many requests in a period are allowed.
+    * `:period` - required, how long, in ms, is the period.
+
+  """
+  @spec conditional_throttle(Plug.Conn.t, term, Keyword.t) :: PlugAttack.rule
+  def conditional_throttle(conn, key, opts) do
+    cond do
+      key && conditional_request?(conn) ->
+        do_conditional_throttle(conn, key, opts)
+      key ->
+        do_throttle(key, opts)
+      true ->
+        nil
+    end
+  end
+
+  defp conditional_request?(conn) do
+    Plug.Conn.get_req_header(conn, "if-none-match") != []
+    or Plug.Conn.get_req_header(conn, "if-modified-since") != []
+  end
+
+  defp do_conditional_throttle(conn, key, opts) do
+    storage = Keyword.fetch!(opts, :storage)
+    limit   = Keyword.fetch!(opts, :limit)
+    period  = Keyword.fetch!(opts, :period)
+    now     = System.system_time(:milliseconds)
+
+    expires_at = expires_at(now, period)
+    count      = check_throttle(storage, key, now, period, expires_at)
+    rem        = limit - count
+    if rem >= 0 do
+      Plug.Conn.register_before_send(conn, fn conn ->
+        before_send_throttle(conn, storage, key, now, period, expires_at, limit, rem)
+      end)
+    else
+      data = [period: period, expires_at: expires_at,
+              limit: limit, remaining: max(rem, 0)]
+      {:block, {:throttle, data}}
+    end
+  end
+
+  defp before_send_throttle(conn, storage, key, now, period, expires_at, limit, rem) do
+    rem =
+      if conn.status != 304 do
+        limit - increment_throttle(storage, key, now, period, expires_at)
+      else
+        rem
+      end
+    data = [period: period, expires_at: expires_at,
+            limit: limit, remaining: max(rem, 0)]
+    {attack_module, opts} = conn.private.plug_attack
+    attack_module.allow_action(conn, {:allow, {:throttle, data}}, opts)
+  end
+
+  defp check_throttle({mod, opts}, key, now, period, expires_at) do
+    full_key = {:throttle, key, div(now, period)}
+    mod.increment(opts, full_key, 0, expires_at)
   end
 
   @doc """
