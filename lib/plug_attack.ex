@@ -177,7 +177,7 @@ defmodule PlugAttack do
   end
 
   defp quote_rule(next, name, conn, opts, _env) do
-    quote do
+    quote generated: true do
       case unquote(name)(unquote(conn)) do
         {:allow, data} -> allow_action(unquote(conn), data, unquote(opts))
         {:block, data} -> block_action(unquote(conn), data, unquote(opts))
