@@ -18,7 +18,6 @@ defmodule PlugAttack.Storage.Ets do
 
   use GenServer
   @behaviour PlugAttack.Storage
-  @compile {:parse_transform, :ms_transform}
 
   @doc """
   Implementation for the PlugAttack.Storage.increment/4 callback.
@@ -39,9 +38,14 @@ defmodule PlugAttack.Storage.Ets do
   Implementation for the PlugAttack.Storage.read_sliding_counter/3 callback.
   """
   def read_sliding_counter(name, key, now) do
-    ms = :ets.fun2ms(fn {{^key, _}, _, expires_at} ->
-      expires_at > now
-    end)
+    ms = [
+      {
+        {{:"$1", :_}, :_, :"$2"},
+        [{:"=:=", {:const, key}, :"$1"}],
+        [{:>, :"$2", {:const, now}}]
+      }
+    ]
+
     :ets.select_count(name, ms)
   end
 
@@ -60,6 +64,7 @@ defmodule PlugAttack.Storage.Ets do
     case :ets.lookup(name, key) do
       [{^key, value, expires_at}] when expires_at > now ->
         {:ok, value}
+
       _ ->
         :error
     end
@@ -93,8 +98,8 @@ defmodule PlugAttack.Storage.Ets do
 
   @doc false
   def init({name, clean_period}) do
-    ^name = :ets.new(name, [:named_table, :set, :public,
-                            write_concurrency: true, read_concurrency: true])
+    opts = [:named_table, :set, :public, write_concurrency: true, read_concurrency: true]
+    ^name = :ets.new(name, opts)
     schedule(clean_period)
     {:ok, %{clean_period: clean_period, name: name}}
   end
@@ -108,7 +113,7 @@ defmodule PlugAttack.Storage.Ets do
 
   defp do_clean(name) do
     now = System.system_time(:milliseconds)
-    ms = :ets.fun2ms(fn {_, _, expires_at} -> expires_at < now end)
+    ms = [{{:_, :_, :"$1"}, [], [{:<, :"$1", {:const, now}}]}]
     :ets.select_delete(name, ms)
   end
 
