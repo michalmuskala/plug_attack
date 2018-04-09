@@ -1,5 +1,10 @@
 # PlugAttack
 
+## v0.3.1 (09.04.2018)
+
+* Don't use parse transforms - they are deprecated
+* Fix dialyzer issues with generated code
+
 ## v0.3.0 (27.02.2017)
 
 * Introduce `PlugAttack.Storage.Ets.clean/1`
