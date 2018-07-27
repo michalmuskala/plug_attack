@@ -112,7 +112,7 @@ defmodule PlugAttack.Storage.Ets do
   end
 
   defp do_clean(name) do
-    now = System.system_time(:milliseconds)
+    now = System.system_time(:millisecond)
     ms = [{{:_, :_, :"$1"}, [], [{:<, :"$1", {:const, now}}]}]
     :ets.select_delete(name, ms)
   end

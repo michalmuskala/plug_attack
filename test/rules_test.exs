@@ -31,7 +31,7 @@ defmodule PlugAttack.RuleTest do
   test "throttle" do
     assert {:allow, {:throttle, data}} = throttle()
 
-    expires = (div(System.system_time(:milliseconds), 100) + 1) * 100
+    expires = (div(System.system_time(:millisecond), 100) + 1) * 100
     assert data[:period]     == 100
     assert data[:limit]      == 5
     assert data[:remaining]  == 4

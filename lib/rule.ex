@@ -71,7 +71,7 @@ defmodule PlugAttack.Rule do
     storage = Keyword.fetch!(opts, :storage)
     limit   = Keyword.fetch!(opts, :limit)
     period  = Keyword.fetch!(opts, :period)
-    now     = System.system_time(:milliseconds)
+    now     = System.system_time(:millisecond)
 
     expires_at = expires_at(now, period)
     count      = do_throttle(storage, key, now, period, expires_at)
@@ -128,7 +128,7 @@ defmodule PlugAttack.Rule do
     limit   = Keyword.fetch!(opts, :limit)
     period  = Keyword.fetch!(opts, :period)
     ban_for = Keyword.fetch!(opts, :ban_for)
-    now     = System.system_time(:milliseconds)
+    now     = System.system_time(:millisecond)
 
     if banned?(key, storage, now) do
       {:block, {:fail2ban, :banned, key}}

@@ -37,7 +37,7 @@ defmodule PlugAttack.Storage.EtsTest do
     assert 1 = Ets.increment(__MODULE__, :foo, 1, expires_in(10))
   end
 
-  defp expires_in(ms), do: System.system_time(:milliseconds) + ms
+  defp expires_in(ms), do: System.system_time(:millisecond) + ms
 
-  defp now(), do: System.system_time(:milliseconds)
+  defp now(), do: System.system_time(:millisecond)
 end
