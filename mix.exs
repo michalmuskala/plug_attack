@@ -3,8 +3,8 @@ defmodule PlugAttack.Mixfile do
 
   def project do
     [app: :plug_attack,
-     version: "0.3.1",
-     elixir: "~> 1.3",
+     version: "0.4.0",
+     elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      description: description(),
@@ -24,7 +24,7 @@ defmodule PlugAttack.Mixfile do
 
   defp deps do
     [{:plug, "~> 1.0"},
-     {:ex_doc, "~> 0.15", only: :dev}]
+     {:ex_doc, "~> 0.19", only: :dev}]
   end
 
   defp package do

@@ -1,5 +1,10 @@
 # PlugAttack
 
+## v0.4.0 (28.07.2018)
+
+* Don't use deprecated time units
+* Require elixir 1.4
+
 ## v0.3.1 (09.04.2018)
 
 * Don't use parse transforms - they are deprecated

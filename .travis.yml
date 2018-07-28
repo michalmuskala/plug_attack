@@ -7,11 +7,11 @@ cache:
     - deps
 
 elixir:
-  - 1.3
+  - 1.4
 
 otp_release:
   - 18.3
-  - 19.1
+  - 19.3
 
 install:
   - mix local.hex --force
