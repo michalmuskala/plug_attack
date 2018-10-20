@@ -19,24 +19,18 @@ defmodule PlugAttack.Storage.Ets do
   use GenServer
   @behaviour PlugAttack.Storage
 
-  @doc """
-  Implementation for the PlugAttack.Storage.increment/4 callback.
-  """
+  @impl true
   def increment(name, key, inc, expires_at) do
     :ets.update_counter(name, key, inc, {key, 0, expires_at})
   end
 
-  @doc """
-  Implementation for the PlugAttack.Storage.write_sliding_counter/3 callback.
-  """
+  @impl true
   def write_sliding_counter(name, key, now, expires_at) do
     true = :ets.insert(name, {{key, now}, 0, expires_at})
     :ok
   end
 
-  @doc """
-  Implementation for the PlugAttack.Storage.read_sliding_counter/3 callback.
-  """
+  @impl true
   def read_sliding_counter(name, key, now) do
     ms = [
       {
@@ -49,17 +43,13 @@ defmodule PlugAttack.Storage.Ets do
     :ets.select_count(name, ms)
   end
 
-  @doc """
-  Implementation for the PlugAttack.Storage.write/4 callback.
-  """
+  @impl true
   def write(name, key, value, expires_at) do
     true = :ets.insert(name, {key, value, expires_at})
     :ok
   end
 
-  @doc """
-  Implementation for the PlugAttack.Storage.read/3 callback.
-  """
+  @impl true
   def read(name, key, now) do
     case :ets.lookup(name, key) do
       [{^key, value, expires_at}] when expires_at > now ->
@@ -97,6 +87,17 @@ defmodule PlugAttack.Storage.Ets do
   end
 
   @doc false
+  def child_spec(opts) do
+    name = Keyword.fetch!(opts, :name)
+    opts = Keyword.delete(opts, :name)
+
+    %{
+      id: name,
+      start: {__MODULE__, :start_link, [name, opts]}
+    }
+  end
+
+  @impl true
   def init({name, clean_period}) do
     opts = [:named_table, :set, :public, write_concurrency: true, read_concurrency: true]
     ^name = :ets.new(name, opts)
@@ -104,7 +105,7 @@ defmodule PlugAttack.Storage.Ets do
     {:ok, %{clean_period: clean_period, name: name}}
   end
 
-  @doc false
+  @impl true
   def handle_info(:clean, state) do
     do_clean(state.name)
     schedule(state.clean_period)

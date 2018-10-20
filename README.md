@@ -57,6 +57,12 @@ children = [
   # other children
   worker(PlugAttack.Storage.Ets, [MyApp.PlugAttack.Storage, [clean_period: 60_000]])
 ]
+
+# or using child specifications:
+
+children = [
+  {PlugAttack.Storage.Ets, name: MyApp.PlugAttack.Storage, clean_period: 60_000}
+]
 ```
 
 We've configured the table to be cleaned of stale data every minute. The
