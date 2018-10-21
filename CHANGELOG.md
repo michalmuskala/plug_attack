@@ -1,5 +1,9 @@
 # PlugAttack
 
+## v0.4.1 (21.10.2018)
+
+* Support `child_spec/1` function
+
 ## v0.4.0 (28.07.2018)
 
 * Don't use deprecated time units

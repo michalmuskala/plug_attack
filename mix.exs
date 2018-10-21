@@ -3,7 +3,7 @@ defmodule PlugAttack.Mixfile do
 
   def project do
     [app: :plug_attack,
-     version: "0.4.0",
+     version: "0.4.1",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -28,8 +28,7 @@ defmodule PlugAttack.Mixfile do
   end
 
   defp package do
-    [maintainers: ["Michał Muskała"],
-     licenses: ["Apache 2.0"],
+    [licenses: ["Apache 2.0"],
      links: %{"GitHub" => "https://github.com/michalmuskala/plug_attack"}]
   end
 end
