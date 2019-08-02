@@ -63,8 +63,8 @@ defmodule PlugAttack do
 
       def block_action(conn, _data, _opts) do
         conn
-        |> send_resp(:forbidden, "Forbidden\n")
-        |> halt
+        |> Plug.Conn.send_resp(:forbidden, "Forbidden\n")
+        |> Plug.Conn.halt()
       end
 
       def allow_action(conn, _data, _opts) do

@@ -1,5 +1,10 @@
 # PlugAttack
 
+## v0.4.2 (02.08.2019)
+
+* Use fully qualified function names in generated functions, to avoid issues
+  if `Plug.Conn` is not imported.
+
 ## v0.4.1 (21.10.2018)
 
 * Support `child_spec/1` function
