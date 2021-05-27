@@ -12,7 +12,7 @@ defmodule PlugAttack.Storage.Ets do
       ]
 
   This will later allow you to pass the `:storage` option to various rules
-  as `storage: {PlugAttack.Ets, MyApp.PlugAttackStorage}`
+  as `storage: {PlugAttack.Storage.Ets, MyApp.PlugAttackStorage}`
 
   """
 
