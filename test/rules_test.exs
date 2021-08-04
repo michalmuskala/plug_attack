@@ -7,20 +7,20 @@ defmodule PlugAttack.RuleTest do
   end
 
   test "fail2ban" do
-    assert {:block, {:fail2ban, :counting, :key}} = fail2ban()
+    assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
     :timer.sleep(1)
-    assert {:block, {:fail2ban, :counting, :key}} = fail2ban()
+    assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
     :timer.sleep(150)
 
-    assert {:block, {:fail2ban, :counting, :key}} = fail2ban()
+    assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
     :timer.sleep(1)
-    assert {:block, {:fail2ban, :counting, :key}} = fail2ban()
+    assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
     :timer.sleep(1)
-    assert {:block, {:fail2ban, :counting, :key}} = fail2ban()
+    assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
     :timer.sleep(100)
     assert {:block, {:fail2ban, :banned, :key}} = fail2ban()
     :timer.sleep(200)
-    assert {:block, {:fail2ban, :counting, :key}} = fail2ban()
+    assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
   end
 
   defp fail2ban() do
