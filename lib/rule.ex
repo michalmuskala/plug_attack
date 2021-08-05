@@ -146,6 +146,6 @@ defmodule PlugAttack.Rule do
     if mod.read_sliding_counter(opts, {:fail2ban, key}, now) >= limit do
       mod.write(opts, {:fail2ban_banned, key}, true, now + ban_for)
     end
-    {:block, {:fail2ban, :counting, key}}
+    {:allow, {:fail2ban, :counting, key}}
   end
 end
