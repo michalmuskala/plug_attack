@@ -13,7 +13,7 @@ defmodule PlugAttack.Mixfile do
   end
 
   def application do
-    [applications: [:logger]]
+    [extra_applications: []]
   end
 
   defp description do
@@ -24,7 +24,8 @@ defmodule PlugAttack.Mixfile do
 
   defp deps do
     [{:plug, "~> 1.0"},
-     {:ex_doc, "~> 0.19", only: :dev}]
+     {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+     {:ex_doc, "~> 0.19", only: :dev, runtime: false}]
   end
 
   defp package do
