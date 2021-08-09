@@ -1,5 +1,9 @@
 # PlugAttack
 
+## v0.4.3 (09.08.2021)
+
+* Fix static :block response in fail2ban rule
+
 ## v0.4.2 (02.08.2019)
 
 * Use fully qualified function names in generated functions, to avoid issues
