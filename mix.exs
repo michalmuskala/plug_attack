@@ -27,7 +27,7 @@ defmodule PlugAttack.Mixfile do
   defp deps do
     [
       {:plug, "~> 1.0"},
-      {:dialyxir, "~> 1.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
