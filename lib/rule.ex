@@ -9,7 +9,7 @@ defmodule PlugAttack.Rule do
   If `value` is truthy the request is allowed, otherwise next rules are
   evaluated.
   """
-  @spec allow(term) :: PlugAttack.rule
+  @spec allow(term) :: PlugAttack.rule()
   def allow(value) do
     if value do
       {:allow, value}
@@ -24,7 +24,7 @@ defmodule PlugAttack.Rule do
   If `value` is truthy the request is blocked, otherwise next rules are
   evaluated.
   """
-  @spec block(term) :: PlugAttack.rule
+  @spec block(term) :: PlugAttack.rule()
   def block(value) do
     if value do
       {:block, value}
@@ -58,7 +58,7 @@ defmodule PlugAttack.Rule do
     * `:period` - required, how long, in ms, is the period.
 
   """
-  @spec throttle(term, Keyword.t) :: PlugAttack.rule
+  @spec throttle(term, Keyword.t()) :: PlugAttack.rule()
   def throttle(key, opts) do
     if key do
       do_throttle(key, opts)
@@ -69,15 +69,14 @@ defmodule PlugAttack.Rule do
 
   defp do_throttle(key, opts) do
     storage = Keyword.fetch!(opts, :storage)
-    limit   = Keyword.fetch!(opts, :limit)
-    period  = Keyword.fetch!(opts, :period)
-    now     = System.system_time(:millisecond)
+    limit = Keyword.fetch!(opts, :limit)
+    period = Keyword.fetch!(opts, :period)
+    now = System.system_time(:millisecond)
 
     expires_at = expires_at(now, period)
-    count      = do_throttle(storage, key, now, period, expires_at)
-    rem        = limit - count
-    data       = [period: period, expires_at: expires_at,
-                  limit: limit, remaining: max(rem, 0)]
+    count = do_throttle(storage, key, now, period, expires_at)
+    rem = limit - count
+    data = [period: period, expires_at: expires_at, limit: limit, remaining: max(rem, 0)]
     {if(rem >= 0, do: :allow, else: :block), {:throttle, data}}
   end
 
@@ -114,7 +113,7 @@ defmodule PlugAttack.Rule do
     * `:ban_for` - required, length of the ban in milliseconds.
 
   """
-  @spec fail2ban(term, Keyword.t) :: PlugAttack.rule
+  @spec fail2ban(term, Keyword.t()) :: PlugAttack.rule()
   def fail2ban(key, opts) do
     if key do
       do_fail2ban(key, opts)
@@ -125,10 +124,10 @@ defmodule PlugAttack.Rule do
 
   defp do_fail2ban(key, opts) do
     storage = Keyword.fetch!(opts, :storage)
-    limit   = Keyword.fetch!(opts, :limit)
-    period  = Keyword.fetch!(opts, :period)
+    limit = Keyword.fetch!(opts, :limit)
+    period = Keyword.fetch!(opts, :period)
     ban_for = Keyword.fetch!(opts, :ban_for)
-    now     = System.system_time(:millisecond)
+    now = System.system_time(:millisecond)
 
     if banned?(key, storage, now) do
       {:block, {:fail2ban, :banned, key}}
@@ -143,9 +142,11 @@ defmodule PlugAttack.Rule do
 
   defp track_fail2ban(key, {mod, opts}, limit, period, ban_for, now) do
     mod.write_sliding_counter(opts, {:fail2ban, key}, now, now + period)
+
     if mod.read_sliding_counter(opts, {:fail2ban, key}, now) >= limit do
       mod.write(opts, {:fail2ban_banned, key}, true, now + ban_for)
     end
+
     {:allow, {:fail2ban, :counting, key}}
   end
 end

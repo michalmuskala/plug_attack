@@ -7,9 +7,9 @@ defmodule PlugAttackTest do
   defmodule TestPlug do
     use PlugAttack
 
-    rule "rule",  do: Process.get(:rule)
-    rule "allow", do: if Process.get(:allow), do: {:allow, []}
-    rule "block", do: if Process.get(:block), do: {:block, []}
+    rule("rule", do: Process.get(:rule))
+    rule("allow", do: if(Process.get(:allow), do: {:allow, []}))
+    rule("block", do: if(Process.get(:block), do: {:block, []}))
 
     def block_action(conn, data, opts) do
       send(self(), {:block, data})

@@ -40,12 +40,12 @@ defmodule PlugAttack do
   @doc """
   Action performed when the request is blocked.
   """
-  @callback block_action(conn :: Plug.Conn.t, term, term) :: Plug.Conn.t
+  @callback block_action(conn :: Plug.Conn.t(), term, term) :: Plug.Conn.t()
 
   @doc """
   Action performed when the request is allowed.
   """
-  @callback allow_action(conn :: Plug.Conn.t, term, term) :: Plug.Conn.t
+  @callback allow_action(conn :: Plug.Conn.t(), term, term) :: Plug.Conn.t()
 
   defmacro __using__(opts) do
     quote do
@@ -71,7 +71,7 @@ defmodule PlugAttack do
         conn
       end
 
-      defoverridable [init: 1, call: 2, block_action: 3, allow_action: 3]
+      defoverridable init: 1, call: 2, block_action: 3, allow_action: 3
 
       import PlugAttack, only: [rule: 2, rule: 3]
 
@@ -85,6 +85,7 @@ defmodule PlugAttack do
     plug_attack = Module.get_attribute(module, :plug_attack)
 
     {conn, opts, body} = PlugAttack.compile(env, plug_attack)
+
     quote do
       defp plug_attack_call(unquote(conn), unquote(opts)), do: unquote(body)
     end
@@ -145,6 +146,7 @@ defmodule PlugAttack do
             import PlugAttack.Rule
             unquote(block)
           end
+
         _ ->
           quote do
             import PlugAttack.Rule
@@ -152,7 +154,7 @@ defmodule PlugAttack do
           end
       end
 
-    var      = Macro.escape(var)
+    var = Macro.escape(var)
     contents = Macro.escape(contents, unquote: true)
 
     quote bind_quoted: [message: message, var: var, contents: contents] do
@@ -179,12 +181,18 @@ defmodule PlugAttack do
   defp quote_rule(next, name, conn, opts, _env) do
     quote generated: true do
       case unquote(name)(unquote(conn)) do
-        {:allow, data} -> allow_action(unquote(conn), data, unquote(opts))
-        {:block, data} -> block_action(unquote(conn), data, unquote(opts))
-        nil            -> unquote(next)
+        {:allow, data} ->
+          allow_action(unquote(conn), data, unquote(opts))
+
+        {:block, data} ->
+          block_action(unquote(conn), data, unquote(opts))
+
+        nil ->
+          unquote(next)
+
         other ->
           raise "a PlugAttack rule should return `{:allow, data}`, " <>
-            "`{:block, data}`, or `nil`, got: #{inspect other}"
+                  "`{:block, data}`, or `nil`, got: #{inspect(other)}"
       end
     end
   end

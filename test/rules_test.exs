@@ -24,17 +24,21 @@ defmodule PlugAttack.RuleTest do
   end
 
   defp fail2ban() do
-    PlugAttack.Rule.fail2ban(:key, storage: {PlugAttack.Storage.Ets, __MODULE__},
-                                   period: 100, limit: 3, ban_for: 200)
+    PlugAttack.Rule.fail2ban(:key,
+      storage: {PlugAttack.Storage.Ets, __MODULE__},
+      period: 100,
+      limit: 3,
+      ban_for: 200
+    )
   end
 
   test "throttle" do
     assert {:allow, {:throttle, data}} = throttle()
 
     expires = (div(System.system_time(:millisecond), 100) + 1) * 100
-    assert data[:period]     == 100
-    assert data[:limit]      == 5
-    assert data[:remaining]  == 4
+    assert data[:period] == 100
+    assert data[:limit] == 5
+    assert data[:remaining] == 4
     assert data[:expires_at] == expires
 
     assert {:allow, _} = throttle()
@@ -43,21 +47,24 @@ defmodule PlugAttack.RuleTest do
     assert {:allow, _} = throttle()
 
     assert {:block, {:throttle, data}} = throttle()
-    assert data[:period]     == 100
-    assert data[:limit]      == 5
-    assert data[:remaining]  == 0
+    assert data[:period] == 100
+    assert data[:limit] == 5
+    assert data[:remaining] == 0
     assert data[:expires_at] == expires
 
     :timer.sleep(100)
     assert {:allow, {:throttle, data}} = throttle()
-    assert data[:period]     == 100
-    assert data[:limit]      == 5
-    assert data[:remaining]  == 4
+    assert data[:period] == 100
+    assert data[:limit] == 5
+    assert data[:remaining] == 4
     assert data[:expires_at] == expires + 100
   end
 
   defp throttle() do
-    PlugAttack.Rule.throttle(:key, storage: {PlugAttack.Storage.Ets, __MODULE__},
-                                   limit: 5, period: 100)
+    PlugAttack.Rule.throttle(:key,
+      storage: {PlugAttack.Storage.Ets, __MODULE__},
+      limit: 5,
+      period: 100
+    )
   end
 end
