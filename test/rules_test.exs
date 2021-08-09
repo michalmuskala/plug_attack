@@ -52,7 +52,7 @@ defmodule PlugAttack.RuleTest do
     assert data[:remaining] == 0
     assert data[:expires_at] == expires
 
-    :timer.sleep(100)
+    :timer.sleep(90)
     assert {:allow, {:throttle, data}} = throttle()
     assert data[:period] == 100
     assert data[:limit] == 5
