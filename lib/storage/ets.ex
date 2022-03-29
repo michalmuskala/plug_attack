@@ -53,7 +53,7 @@ defmodule PlugAttack.Storage.Ets do
   def read(name, key, now) do
     case :ets.lookup(name, key) do
       [{^key, value, expires_at}] when expires_at > now ->
-        {:ok, value}
+        {:ok, value, expires_at - now}
 
       _ ->
         :error

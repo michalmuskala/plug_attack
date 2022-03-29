@@ -26,7 +26,7 @@ defmodule PlugAttack.Storage.EtsTest do
   test "read/write" do
     assert :error = Ets.read(__MODULE__, :foo, now())
     Ets.write(__MODULE__, :foo, true, expires_in(20))
-    assert {:ok, true} == Ets.read(__MODULE__, :foo, now())
+    assert {:ok, true, 20} == Ets.read(__MODULE__, :foo, now())
     :timer.sleep(30)
     assert :error = Ets.read(__MODULE__, :foo, now())
   end
