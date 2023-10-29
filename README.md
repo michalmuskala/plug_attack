@@ -6,22 +6,11 @@ This is inspired by the Kickstarter's Rack::Attack middleware for Ruby.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
-
-  1. Add `plug_attack` to your list of dependencies in `mix.exs`:
+  Add `plug_attack` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:plug_attack, "~> 0.4.2"}]
-end
-```
-
-  2. If using Elixir 1.3, ensure that `plug_attack` is started before your application  
-  (this step is no longer applicable to Elixir 1.4+):
-
-```elixir
-def application do
-  [applications: [:plug_attack]]
+  [{:plug_attack, "~> 0.4.3"}]
 end
 ```
 
