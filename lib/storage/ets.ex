@@ -1,6 +1,6 @@
 defmodule PlugAttack.Storage.Ets do
   @moduledoc """
-  Storage solution for PlugAttack using a local ets table.
+  Storage solution for `PlugAttack` using a local `:ets` table.
 
   ## Usage
 
@@ -8,7 +8,7 @@ defmodule PlugAttack.Storage.Ets do
 
       children = [
         # ...
-        worker(PlugAttack.Storage.Ets, [MyApp.PlugAttackStorage])
+        {PlugAttack.Storage.Ets, name: MyApp.PlugAttackStorage}
       ]
 
   This will later allow you to pass the `:storage` option to various rules
@@ -70,7 +70,7 @@ defmodule PlugAttack.Storage.Ets do
   @doc """
   Starts the storage table and cleaner process.
 
-  The process is registered under `name` and a public, named ets table
+  The process is registered under `name` and a public, named `:ets` table
   with that name is created as well.
 
   ## Options

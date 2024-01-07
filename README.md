@@ -1,18 +1,19 @@
 # PlugAttack
 
+[![build](https://github.com/michalmuskala/plug_attack/actions/workflows/ci.yml/badge.svg)](https://github.com/michalmuskala/plug_attack/actions/workflows/ci.yml) [![Hex.pm](https://img.shields.io/hexpm/v/plug_attack.svg)](https://hex.pm/packages/plug_attack) [![Docs](http://img.shields.io/badge/hex.pm-docs-green.svg?style=flat)](https://hexdocs.pm/plug_attack/)
+
+
 A plug building toolkit for blocking and throttling abusive requests.
 
 This is inspired by the Kickstarter's Rack::Attack middleware for Ruby.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
-
   1. Add `plug_attack` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:plug_attack, "~> 0.4.2"}]
+  [{:plug_attack, "~> 0.4.3"}]
 end
 ```
 
