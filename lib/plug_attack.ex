@@ -2,7 +2,7 @@ defmodule PlugAttack do
   @moduledoc ~S"""
   A plug building toolkit for blocking and throttling abusive requests.
 
-  PlugAttack is a set of macros that can be used to build a plug to protect
+  `PlugAttack` is a set of macros that can be used to build a plug to protect
   your web app from bad clients. It allows safelisting, blocklisting and
   throttling based on arbitrary properties of the request.
 

@@ -1,6 +1,8 @@
 defmodule PlugAttack.Mixfile do
   use Mix.Project
 
+  @repository "https://github.com/michalmuskala/plug_attack"
+
   def project do
     [
       app: :plug_attack,
@@ -9,6 +11,8 @@ defmodule PlugAttack.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
+      source_url: @repository,
+      homepage_url: @repository,
       package: package(),
       deps: deps()
     ]
@@ -34,8 +38,8 @@ defmodule PlugAttack.Mixfile do
 
   defp package do
     [
-      licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/michalmuskala/plug_attack"}
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => @repository}
     ]
   end
 end
