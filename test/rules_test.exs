@@ -18,7 +18,7 @@ defmodule PlugAttack.RuleTest do
     :timer.sleep(1)
     assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
     :timer.sleep(100)
-    assert {:block, {:fail2ban, :banned, :key}} = fail2ban()
+    assert {:block, {:fail2ban, :banned, :key, 99}} = fail2ban()
     :timer.sleep(200)
     assert {:allow, {:fail2ban, :counting, :key}} = fail2ban()
   end

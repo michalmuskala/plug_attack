@@ -98,7 +98,7 @@ defmodule PlugAttack.Rule do
   Be careful not to use the same `key` for different rules that use the same
   storage.
 
-  Passes `{:fail2ban, key}`, as the data to `block_action` calls when an
+  Passes `{:fail2ban, key, remaining_ban}`, as the data to `block_action` calls when an
   abusive request is detected. Each misbehaving client is blocked after each
   call and tracked for `:period` time. If more than `:limit` abusive requests
   are detected within the `:period`, the client is banned for `:ban_for`.
@@ -129,15 +129,17 @@ defmodule PlugAttack.Rule do
     ban_for = Keyword.fetch!(opts, :ban_for)
     now = System.system_time(:millisecond)
 
-    if banned?(key, storage, now) do
-      {:block, {:fail2ban, :banned, key}}
-    else
-      track_fail2ban(key, storage, limit, period, ban_for, now)
+    case banned?(key, storage, now) do
+      {true, remaining_ban} -> {:block, {:fail2ban, :banned, key, remaining_ban}}
+      false -> track_fail2ban(key, storage, limit, period, ban_for, now)
     end
   end
 
   defp banned?(key, {mod, opts}, now) do
-    mod.read(opts, {:fail2ban_banned, key}, now) == {:ok, true}
+    case mod.read(opts, {:fail2ban_banned, key}, now) do
+      {:ok, true, remaining_ban} -> {true, remaining_ban}
+      _ -> false
+    end
   end
 
   defp track_fail2ban(key, {mod, opts}, limit, period, ban_for, now) do
